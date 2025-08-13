@@ -110,3 +110,163 @@ Data will be segregated into three distinct categories, each handled by a specif
     * Build and style the `ChatInterface.js` component.
     * Connect the `ChatInterface.js` to the new backend endpoints.
 5.  **Testing and Refinement:** Conduct end-to-end testing of the full gameplay loop.
+
+
+Blueprint: AI Roleplaying Game Application (LCA Integration)
+1. Overview and Core Principles
+This document outlines the system architecture for a dynamic, AI-powered roleplaying game application, designed to integrate with the lotcastingatemi (LCA) platform. The primary goal is to create a responsive and immersive storytelling experience while maintaining cost-efficiency and allowing for a game world that evolves through player and AI interaction with the LCA backend.
+
+The architecture is built on three core principles:
+
+Modularity: Data sources are managed independently based on their type and priority (Core Rules vs. Living World State).
+
+Cost-Efficiency: The system aggressively minimizes API costs through an optimized context caching strategy and by using the most appropriate tool for each task.
+
+Dynamic World: The application is a "living" system where the AI can directly modify the LCA character sheet and campaign database via API tools, persisting all in-game changes.
+
+2. System Architecture Diagram
+The system is composed of four main components: the User Interface (LCA Front End), the Backend Session Manager, the Gemini API, and the various Data Sources including the LCA API. The ChatSessionManager is the central orchestrator.
+
+graph TD
+    subgraph User
+        UI[LCA Front End]
+    end
+
+    subgraph Backend
+        Manager[ChatSessionManager]
+    end
+
+    subgraph Google Cloud
+        Gemini[Gemini 1.5 Pro API]
+    end
+
+    subgraph Data Stores
+        CorpusLow[Low-Priority Corpus: Core Rulebooks]
+        CorpusHigh[High-Priority Corpus: Living World]
+        LCA_API[LCA API: Character Sheets, DB]
+        Cache[Context Cache: Session History]
+    end
+
+    UI -- User Prompt --> Manager
+    Manager -- Assembled Request --> Gemini
+    Gemini -- Response --> Manager
+    Manager -- Formatted Response --> UI
+
+    Manager -- Manages --> Cache
+    Gemini -- Uses --> Cache
+
+    Gemini -- Invokes Tool --> CorpusLow
+    Gemini -- Invokes Tool --> CorpusHigh
+    Gemini -- Invokes Tool --> Manager
+
+    subgraph Function Calling
+      Manager -- Executes Function --> LCA_API
+    end
+
+3. Data Source Management
+The architecture uses a prioritized, multi-source strategy to ensure the AI uses the most relevant and up-to-date information.
+
+3.1. Core Rulebooks (Low Priority)
+Strategy: Integrated RAG
+
+Implementation: All large, static rulebooks will be uploaded into a Corpus (e.g., lca-core-rules-corpus).
+
+Access Method: The AI will be instructed to use this Tool as a last resort, only if a query cannot be answered by other, higher-priority sources.
+
+3.2. Living World Data (High Priority)
+Strategy: Integrated RAG
+
+Implementation: A second, high-priority Corpus (e.g., lca-campaign-data-corpus) will contain the dynamic "state" of the specific campaign: the Chronicle, Dramatis Personae, Gazetteer, summarized rules, and examples of items/spells.
+
+Access Method: The AI will be instructed to prioritize this Tool for all lore and context-related queries.
+
+3.3. Character Sheet & Live Game State
+Strategy: Direct API Integration via Function Calling
+
+Implementation: The lotcastingatemi (LCA) application's own API serves as the canonical source of truth for all character data.
+
+Access Method: The Gemini model will be given Tool definitions for functions that call the LCA API directly (e.g., update_character_health, add_item_to_inventory). This allows for real-time, persistent changes to the character sheet.
+
+3.4. Dynamic Session State (Chronicle & Initial Context)
+Strategy: Context Caching
+
+Implementation: The initial context for any session will be immediately cached. This cache will contain the core Storyteller (ST) instructions and a JSON object representing the player's current character sheet, retrieved from the LCA API.
+
+Access Method: Subsequent chat history is periodically "checkpointed" into new caches, solving the snowballing context problem.
+
+4. Core Backend Component: ChatSessionManager
+The ChatSessionManager orchestrates the session, managing the state and tool use.
+
+Class Structure (Conceptual)
+class ChatSessionManager:
+    # --- Properties ---
+    live_history: list
+    live_history_tokens: int
+    active_cache_name: str
+    
+    # --- Constants ---
+    CACHE_THRESHOLD = 5000
+
+    # --- Methods ---
+    def __init__(self, st_instructions, character_sheet_json):
+        # Initializes the session, creates the first cache from ST instructions + character sheet.
+        pass
+
+    def handle_new_message(self, user_prompt):
+        # Main method orchestrating the entire request lifecycle.
+        pass
+
+    def _create_checkpoint(self, content_to_cache):
+        # Creates a new cache and returns its name.
+        pass
+
+    # --- Tool-bound Functions (LCA API Wrappers) ---
+    def get_character_health(self, character_id: str):
+        # Calls LCA API GET /characters/{id}/health
+        pass
+    
+    def update_character_health(self, character_id: str, new_health: int):
+        # Calls LCA API PUT /characters/{id}/health
+        pass
+
+    def add_item_to_inventory(self, character_id: str, item_json: dict):
+        # Calls LCA API POST /characters/{id}/inventory
+        pass
+
+5. Request Lifecycle Walkthrough
+User Prompt: "I loot the mage's equipment, hoping for a fire-enhancing ring. If I find one, let's reduce its damage bonus by 2 and add it to my sheet."
+
+Receive: The ChatSessionManager receives the prompt.
+
+API Call: The manager calls generate_content with:
+
+contents: The live history + new prompt.
+
+cached_content: The active session cache (containing ST instructions and the initial character sheet state).
+
+tools: A list of all available tools: the two RAG Corpus tools and all LCA API function tools.
+
+Model Reasoning & Collaboration:
+
+The model uses the cache to understand the context of the scene.
+
+It sees the request for a "fire enhancing ring" and may consult the high-priority campaign-data-corpus for examples.
+
+It generates a proposal for the ring and its stats.
+
+It processes the user's follow-up negotiation ("reduce the damage enhancement by 2").
+
+It generates the final, agreed-upon stats for the new item.
+
+Recognizing the intent "add it to my sheet," it formulates a call to the add_item_to_inventory() function with the character's ID and the new item's JSON.
+
+Backend Execution: The ChatSessionManager receives the function call and makes a POST request to the LCA API, which updates the character's database entry.
+
+Final Response: The model receives the success message from the function call and generates the final narrative response for the user.
+
+State Update & Checkpoint: The manager updates the live_history and checks if it's time to create a new checkpoint cache.
+
+6. Caching Strategy
+In-Session: An aggressive checkpointing strategy is used. A new cache is created when the live_history exceeds 5,000 tokens.
+
+Post-Session: At the end of a session, the entire session log is saved as a final cache. This allows for efficient "out-of-character" tasks like summarizing the session for the chronicle, updating the gazetteer, or reviewing events without incurring high narrative generation costs. Caches should have a TTL (e.g., 12 hours) for automatic cleanup.
