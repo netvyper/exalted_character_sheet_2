@@ -126,7 +126,13 @@ const ImportButton = ({
 
       // 2. Create and then update all the nested items
       const createAndUpdate = (createFn, updateFn) => async (item) => {
-        const { id, ...itemData } = item
+        const {
+          id,
+          character_id,
+          created_at,
+          updated_at,
+          ...itemData
+        } = item
         const createOptions = { type: item.type || item.charm_type }
         const { payload: newEntity } = await createFn(
           character.id,
@@ -135,15 +141,22 @@ const ImportButton = ({
         updateFn(newEntity.id, character.id, itemData)
       }
 
-      await Promise.all([
-        ...merits.map(createAndUpdate(createMerit, updateMerit)),
-        ...weapons.map(createAndUpdate(createWeapon, updateWeapon)),
-        ...spells.map(createAndUpdate(createSpell, updateSpell)),
-        ...charms.map(createAndUpdate(createCharm, updateCharm)),
-        ...martial_arts_charms.map(createAndUpdate(createCharm, updateCharm)),
-        ...evocations.map(createAndUpdate(createCharm, updateCharm)),
-        ...spirit_charms.map(createAndUpdate(createCharm, updateCharm)),
-      ])
+      try {
+        await Promise.all([
+          ...merits.map(createAndUpdate(createMerit, updateMerit)),
+          ...weapons.map(createAndUpdate(createWeapon, updateWeapon)),
+          ...spells.map(createAndUpdate(createSpell, updateSpell)),
+          ...charms.map(createAndUpdate(createCharm, updateCharm)),
+          ...martial_arts_charms.map(createAndUpdate(createCharm, updateCharm)),
+          ...evocations.map(createAndUpdate(createCharm, updateCharm)),
+          ...spirit_charms.map(createAndUpdate(createCharm, updateCharm)),
+        ])
+      } catch (e) {
+        console.error('Error importing character details', e)
+        alert(
+          'An error occurred during the import. Some items may not have been imported correctly.',
+        )
+      }
     }
     setDiffing(false)
     setImportedCharacter(null)
