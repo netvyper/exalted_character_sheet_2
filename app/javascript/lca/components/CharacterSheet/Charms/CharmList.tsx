@@ -1,17 +1,11 @@
 import * as React from 'react'
-import { connect } from 'react-redux'
 
 import { Grid } from '@material-ui/core'
-import { State } from 'ducks'
-import { getCharmsForCharacterByType } from 'ducks/entities'
 import { Charm } from 'types'
 import FullCharmDisplay from './CharmDisplay/FullCharm'
-import { CharmFilter, filterCharms } from './useCharmFilters'
 
 interface ExposedProps {
-  id: number
-  type: 'evocation' | 'martialArts' | 'native' | 'spirit'
-  filters: CharmFilter
+  charms: Charm[]
 }
 
 const fullViewMap = (c: Charm) => (
@@ -20,7 +14,7 @@ const fullViewMap = (c: Charm) => (
   </Grid>
 )
 
-const CharmList = props => {
+const CharmList = (props: ExposedProps) => {
   const mappedCharms = (
     <Grid container spacing={3}>
       {props.charms.map(fullViewMap)}
@@ -29,10 +23,4 @@ const CharmList = props => {
   return <>{mappedCharms}</>
 }
 
-const mapState = (state: State, props: ExposedProps) => {
-  const getCharms = getCharmsForCharacterByType[props.type] || (() => [])
-  const charms = filterCharms(getCharms(state, props.id), props.filters)
-  return { charms }
-}
-
-export default connect(mapState)(CharmList)
+export default CharmList

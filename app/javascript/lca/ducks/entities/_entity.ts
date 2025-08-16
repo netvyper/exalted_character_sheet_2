@@ -21,38 +21,68 @@ export const mergeEntity = (state: EntityState, action) =>
 export const createEntityReducer = (entityType: eTypes, reducers: {} = {}) => {
   const pluralType = entityType + 's'
 
+  const mergeAndUpdatePlayer = (state: EntityState, action) => {
+    const myID = state.currentPlayer
+    const newState = mergeEntity(state, action)
+    const newPlayerCharacters = [
+      ...new Set(
+        (state.players[myID]?.[pluralType] || []).concat(action.payload.result),
+      ),
+    ]
+
+    newState.players = {
+      ...newState.players,
+      [myID]: {
+        ...newState.players[myID],
+        [pluralType]: newPlayerCharacters,
+      },
+    }
+
+    return newState
+  }
+
   return {
     ...reducers,
-    [crudAction(entityType, 'CREATE').success.toString()]: mergeEntity,
-    [crudAction(entityType, 'DUPLICATE').success.toString()]: mergeEntity,
+    [crudAction(entityType, 'CREATE').success.toString()]: mergeAndUpdatePlayer,
+    [crudAction(entityType, 'DUPLICATE').success.toString()]: mergeAndUpdatePlayer,
     [crudAction(entityType, 'FETCH').success.toString()]: mergeEntity,
-    [crudAction(entityType, 'FETCH_ALL').success.toString()]: (
+    [crudAction(entityType, 'FETCH_ALL').success.toString()]: mergeAndUpdatePlayer,
+    [crudAction(entityType, 'UPDATE').start.toString()]: (
       state: EntityState,
       action,
     ) => {
-      const myID = state.currentPlayer
-      const newState = mergeEntity(state, action)
-      newState.players[myID][pluralType] = [
-        ...new Set(
-          (state.players[myID][pluralType] || []).concat(action.payload.result),
-        ),
-      ]
+      const { id } = action.meta
+      const updatedEntity = {
+        ...state[pluralType][id],
+        ...action.payload,
+      }
 
-      return newState
+      return {
+        ...state,
+        [pluralType]: {
+          ...state[pluralType],
+          [id]: updatedEntity,
+        },
+      }
     },
-    [crudAction(entityType, 'UPDATE').start.toString()]:
-      reducerUpdateAction(pluralType),
     [crudAction(entityType, 'DESTROY').start.toString()]: (
       state: EntityState,
       action,
     ) => {
       const { id } = action.meta
       const myId = state.currentPlayer
+      const newState = { ...state }
 
-      delete state[pluralType][id]
-      state.players[myId][pluralType] = state.players[myId][pluralType].filter(
+      newState[pluralType] = { ...state[pluralType] }
+      delete newState[pluralType][id]
+
+      newState.players = { ...state.players }
+      newState.players[myId] = { ...state.players[myId] }
+      newState.players[myId][pluralType] = state.players[myId][pluralType].filter(
         (i: number) => i !== id,
       )
+
+      return newState
     },
   }
 }

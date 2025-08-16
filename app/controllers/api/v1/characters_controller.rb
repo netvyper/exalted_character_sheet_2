@@ -94,6 +94,39 @@ module Api
           xp_log_solar:       [Schemas::XP_LOG_PARAMS],
           bp_log:             [Schemas::XP_LOG_PARAMS],
           forms:              [Schemas::FORM_PARAMS],
+          merits_attributes:  [
+            :id, :_destroy, :rating, :label, :merit_name, :merit_cat,
+            :description, :ref, :supernatural, :prereqs, :mutation, forms: []
+          ],
+          weapons_attributes: [
+            :id, :_destroy, :name, :ability, :weight, :is_artifact, :notes,
+            :bonus_accuracy, :bonus_damage, :bonus_defense, :bonus_overwhelming,
+            tags: []
+          ],
+          spells_attributes: [
+            :id, :_destroy, :name, :cost, :circle, :duration, :body, :ref,
+            :control, keywords: [], categories: []
+          ],
+          ability_charms_attributes: [
+            :id, :_destroy, :name, :cost, :timing, :duration, :keywords,
+            :min_essence, :prereqs, :body, :ref, :summary, :ability, :min_ability,
+            categories: []
+          ],
+          martial_arts_charms_attributes: [
+            :id, :_destroy, :name, :cost, :timing, :duration, :keywords,
+            :min_essence, :prereqs, :body, :ref, :summary, :style,
+            categories: []
+          ],
+          evocations_attributes: [
+            :id, :_destroy, :name, :cost, :timing, :duration, :keywords,
+            :min_essence, :prereqs, :body, :ref, :summary, :artifact_name,
+            categories: []
+          ],
+          spirit_charms_attributes: [
+            :id, :_destroy, :name, :cost, :timing, :duration, :keywords,
+            :min_essence, :prereqs, :body, :ref, :summary,
+            categories: []
+          ],
           caste_attributes:   [],
           favored_attributes: [],
           caste_abilities:    [],

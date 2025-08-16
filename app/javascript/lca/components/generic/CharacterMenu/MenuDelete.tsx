@@ -68,10 +68,15 @@ const MenuDelete = ({ canDelete, action, name }: InnerProps) => {
   )
 }
 
-const mapState = (state: State, { id, characterType }: Props): StateProps => ({
-  canDelete: canIDelete(state, id, characterType),
-  name: state.entities.current[characterType + 's'][id].name,
-})
+import { getSpecificCharacter } from '../../../selectors/character'
+
+const mapState = (state: State, { id, characterType }: Props): StateProps => {
+  const character = getSpecificCharacter(state, id)
+  return {
+    canDelete: canIDelete(state, id, characterType),
+    name: character ? character.name : '',
+  }
+}
 
 const mapDispatch = (
   dispatch,

@@ -5,7 +5,7 @@ import { ListItemIcon, ListItemText, MenuItem } from '@material-ui/core'
 import { GetApp } from '@material-ui/icons'
 
 import { State } from 'ducks'
-import { getCharacterAsCharacter } from '../../../selectors/characters'
+import { getSpecificCharacter } from '../../../selectors/character'
 import { Character } from 'types'
 import { MenuItemProps } from './CharacterMenuItem'
 
@@ -47,7 +47,7 @@ const ExportButton = ({ character, characterType }: InnerProps) => {
 
 const mapState = (state: State, { id, characterType }: MenuItemProps): StateProps => ({
   character:
-    characterType === 'character' ? getCharacterAsCharacter(state, id) : null,
+    characterType === 'character' ? getSpecificCharacter(state, id) : null,
 })
 
 export default connect<StateProps, {}, MenuItemProps>(mapState)(ExportButton)

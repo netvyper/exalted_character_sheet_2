@@ -55,11 +55,16 @@ const CardMenuPin = ({ isPinned, isHidden, canEdit, pin, hide }: InnerProps) =>
     </>
   ) : null
 
-const mapState = (state: State, { characterType, id }: Props): StateProps => ({
-  canEdit: canIDelete(state, id, characterType),
-  isHidden: state.entities.current[characterType + 's'][id].hidden,
-  isPinned: state.entities.current[characterType + 's'][id].pinned,
-})
+import { getSpecificCharacter } from '../../../selectors/character'
+
+const mapState = (state: State, { characterType, id }: Props): StateProps => {
+  const character = getSpecificCharacter(state, id)
+  return {
+    canEdit: canIDelete(state, id, characterType),
+    isHidden: character ? character.hidden : false,
+    isPinned: character ? character.pinned : false,
+  }
+}
 
 const mapDispatch = (
   dispatch,

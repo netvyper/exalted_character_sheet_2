@@ -1,6 +1,6 @@
 import * as React from 'react'
 import DocumentTitle from 'react-document-title'
-import { connect } from 'react-redux'
+import { connect, useSelector } from 'react-redux'
 
 import { Grid, Paper, Typography } from '@material-ui/core'
 
@@ -56,8 +56,16 @@ function mapStateToProps(state: State, { match }: RouteProps) {
 
   return {
     character: getSpecificCharacter(state, id),
-    merits: getMeritsForCharacter(state, id),
   }
 }
 
-export default ProtectedComponent(connect(mapStateToProps)(MeritFullPage))
+const MeritPageContainer = (props: { character: Character } & RouteProps) => {
+  const merits = useSelector((state: State) =>
+    getMeritsForCharacter(state, props.character?.id),
+  )
+  return <MeritFullPage {...props} merits={merits} />
+}
+
+export default ProtectedComponent(
+  connect(mapStateToProps)(MeritPageContainer),
+)

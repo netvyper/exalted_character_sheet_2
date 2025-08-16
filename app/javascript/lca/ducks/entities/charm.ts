@@ -32,34 +32,46 @@ const getCharms = (state: State) => unwrapped(state).charms
 
 export const getNativeCharmsForCharacter = createCachedSelector(
   [getSpecificCharacter, getCharms],
-  (character, charms) =>
-    character == null
-      ? []
-      : character.charms.map((c) => charms[c]).sort(sortOrderSort),
+  (character, charms) => {
+    if (!character || character.charms === undefined) return []
+    return character.charms
+      .map((c) => charms[c])
+      .filter((c) => c)
+      .sort(sortOrderSort)
+  },
 )(idMemoizer)
 
 export const getMartialArtsCharmsForCharacter = createCachedSelector(
   [getSpecificCharacter, getCharms],
-  (character, charms) =>
-    character == null
-      ? []
-      : character.martial_arts_charms.map((c) => charms[c]).sort(sortOrderSort),
+  (character, charms) => {
+    if (!character || character.martial_arts_charms === undefined) return []
+    return character.martial_arts_charms
+      .map((c) => charms[c])
+      .filter((c) => c)
+      .sort(sortOrderSort)
+  },
 )(idMemoizer)
 
 export const getEvocationsForCharacter = createCachedSelector(
   [getSpecificCharacter, getCharms],
-  (character, charms) =>
-    character == null
-      ? []
-      : character.evocations.map((c) => charms[c]).sort(sortOrderSort),
+  (character, charms) => {
+    if (!character || character.evocations === undefined) return []
+    return character.evocations
+      .map((c) => charms[c])
+      .filter((c) => c)
+      .sort(sortOrderSort)
+  },
 )(idMemoizer)
 
 export const getSpiritCharmsForCharacter = createCachedSelector(
   [getSpecificCharacter, getCharms],
-  (character, charms) =>
-    character == null
-      ? []
-      : character.spirit_charms.map((c) => charms[c]).sort(sortOrderSort),
+  (character, charms) => {
+    if (!character || character.spirit_charms === undefined) return []
+    return character.spirit_charms
+      .map((c) => charms[c])
+      .filter((c) => c)
+      .sort(sortOrderSort)
+  },
 )(idMemoizer)
 
 export const getCharmsForCharacterByType = {
@@ -72,9 +84,10 @@ export const getCharmsForCharacterByType = {
 export const getAllAbilitiesWithCharmsForCharacter = createCachedSelector(
   [getNativeCharmsForCharacter, getMartialArtsCharmsForCharacter],
   (charms, maCharms) => {
+    if (!charms) return []
     let abilities = [...new Set(charms.map((c) => c.ability))]
 
-    if (maCharms.length > 0) {
+    if (maCharms?.length > 0) {
       abilities = abilities.concat(['martial_arts'])
     }
 
@@ -89,12 +102,8 @@ export const getAllCharmsForCharacter = createCachedSelector(
     getEvocationsForCharacter,
     getSpiritCharmsForCharacter,
   ],
-  (natives, martialArts, evocations, spirit) => [
-    ...natives,
-    ...martialArts,
-    ...evocations,
-    ...spirit,
-  ],
+  (natives, martialArts, evocations, spirit) =>
+    [...natives, ...martialArts, ...evocations, ...spirit].filter((c) => c),
 )(idMemoizer)
 
 export const getAllCharmCategoriesForCharacter = createCachedSelector(
