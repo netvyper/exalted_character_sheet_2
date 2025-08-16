@@ -63,10 +63,13 @@ export const massagePayload =
   ({} = {}, {} = {}, res) =>
     getJSON(res.clone()).then((json) => normalize(json, schemas[type]))
 
-export const successMeta = (_: null, __: null, { headers }: Response) => ({
-  page: headers.get('current-page'),
-  lastPage: headers.get('total-pages'),
-})
+export const successMeta = (_: null, __: null, res?: Response) => {
+  if (!res) return {}
+  return {
+    page: res.headers.get('current-page'),
+    lastPage: res.headers.get('total-pages'),
+  }
+}
 
 type TypesTuple = [Action, Action, Action]
 

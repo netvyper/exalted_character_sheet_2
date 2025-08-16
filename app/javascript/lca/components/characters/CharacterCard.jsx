@@ -235,11 +235,20 @@ export function CharacterCard({
   )
 }
 
-const mapStateToProps = (state, props: ExposedProps) => ({
-  canDelete: canIDeleteCharacter(state, props.character.id),
-  penalties: getPenalties(state, props.character.id),
-  pools: getPoolsAndRatings(state, props.character.id),
-})
+const mapStateToProps = (state, props: ExposedProps) => {
+  if (!props.character) {
+    return {
+      canDelete: false,
+      penalties: {},
+      pools: {},
+    }
+  }
+  return {
+    canDelete: canIDeleteCharacter(state, props.character.id),
+    penalties: getPenalties(state, props.character.id),
+    pools: getPoolsAndRatings(state, props.character.id),
+  }
+}
 
 const enhance: Enhancer<Props, ExposedProps> = compose(
   connect(mapStateToProps),

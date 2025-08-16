@@ -13,21 +13,18 @@ import CharacterLoadError from '../CharacterLoadError'
 import SpellList from './SpellList'
 
 interface StateProps {
-  id: number
-  name: string
+  character?: Character
 }
 
-// interface Props extends StateProps {}
-
-const SorceryPage = ({ id, name }: StateProps) => {
+const SorceryPage = ({ character }: StateProps) => {
   /* Escape hatch */
-  if (name == null) {
+  if (character == null) {
     return <CharacterLoadError />
   }
 
   return (
     <>
-      <DocumentTitle title={`${name} Sorcery | Lot-Casting Atemi`} />
+      <DocumentTitle title={`${character.name} Sorcery | Lot-Casting Atemi`} />
 
       <Grid container spacing={3}>
         <Grid item xs={12}>
@@ -35,7 +32,7 @@ const SorceryPage = ({ id, name }: StateProps) => {
         </Grid>
       </Grid>
 
-      <SpellList characterId={id} />
+      <SpellList characterId={character.id} />
     </>
   )
 }
@@ -43,8 +40,7 @@ const SorceryPage = ({ id, name }: StateProps) => {
 const mapState = (state: State, { match }: RouteProps): StateProps => {
   const id = parseInt(match.params.id, 10)
   return {
-    id,
-    name: (getSpecificCharacter(state, id) || ({} as any)).name,
+    character: getSpecificCharacter(state, id),
   }
 }
 

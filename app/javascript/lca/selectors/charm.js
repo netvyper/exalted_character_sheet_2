@@ -13,48 +13,50 @@ const getCharms = state => entities(state).charms
 // $FlowFixMe
 export const getNativeCharmsForCharacter = createCachedSelector(
   [getSpecificCharacter, getCharms],
-  (character, charms) =>
-    character.charms === undefined
-      ? []
-      : character.charms.map(c => charms[c]).sort(sortOrderSort)
+  (character, charms) => {
+    if (!character || !character.charms) return []
+    return character.charms.map((c) => charms[c]).sort(sortOrderSort)
+  },
 )(characterIdMemoizer)
 
 // $FlowFixMe
 export const getMartialArtsCharmsForCharacter = createCachedSelector(
   [getSpecificCharacter, getCharms],
-  (character, charms) =>
-    character.martial_arts_charms === undefined
-      ? []
-      : character.martial_arts_charms.map(c => charms[c]).sort(sortOrderSort)
+  (character, charms) => {
+    if (!character || !character.martial_arts_charms) return []
+    return character.martial_arts_charms
+      .map((c) => charms[c])
+      .sort(sortOrderSort)
+  },
 )(characterIdMemoizer)
 
 // $FlowFixMe
 export const getEvocationsForCharacter = createCachedSelector(
   [getSpecificCharacter, getCharms],
-  (character, charms) =>
-    character.evocations === undefined
-      ? []
-      : character.evocations.map(c => charms[c]).sort(sortOrderSort)
+  (character, charms) => {
+    if (!character || !character.evocations) return []
+    return character.evocations.map((c) => charms[c]).sort(sortOrderSort)
+  },
 )(characterIdMemoizer)
 
 // $FlowFixMe
 export const getSpiritCharmsForCharacter = createCachedSelector(
   [getSpecificCharacter, getCharms],
-  (character, charms) =>
-    character.spirit_charms === undefined
-      ? []
-      : character.spirit_charms.map(c => charms[c]).sort(sortOrderSort)
+  (character, charms) => {
+    if (!character || !character.spirit_charms) return []
+    return character.spirit_charms.map((c) => charms[c]).sort(sortOrderSort)
+  },
 )(characterIdMemoizer)
 
-const getSpells = state => entities(state).spells
+const getSpells = (state) => entities(state).spells
 
 // $FlowFixMe
 const getSpellsForCharacter = createCachedSelector(
   [getSpecificCharacter, getSpells],
-  (character, spells) =>
-    character.spells.length === 0
-      ? []
-      : character.spells.map(s => spells[s]).sort(sortOrderSort)
+  (character, spells) => {
+    if (!character || !character.spells) return []
+    return character.spells.map((s) => spells[s]).sort(sortOrderSort)
+  },
 )(characterIdMemoizer)
 
 // $FlowFixMe

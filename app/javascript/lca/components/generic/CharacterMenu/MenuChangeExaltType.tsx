@@ -110,13 +110,14 @@ const MenuChangeCharacterType = ({
   )
 }
 
-const mapState = (state: State, { id, characterType }: Props): StateProps => ({
-  canEdit: canIEdit(state, id, characterType),
-  currentType:
-    characterType === 'character'
-      ? getSpecificCharacter(state, id).type
-      : undefined,
-})
+const mapState = (state: State, { id, characterType }: Props): StateProps => {
+  const character = getSpecificCharacter(state, id)
+  return {
+    canEdit: canIEdit(state, id, characterType),
+    currentType:
+      characterType === 'character' && character ? character.type : null,
+  }
+}
 
 export default connect<StateProps, DispatchProps, Props>(mapState, {
   action: changeCharacterType,

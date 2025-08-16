@@ -38,10 +38,15 @@ const CardMenuRemove = ({ chronId, canEdit, action }: InnerProps) =>
     </>
   ) : null
 
-const mapState = (state: State, { id, characterType }: Props): StateProps => ({
-  canEdit: canIEdit(state, id, characterType),
-  chronId: state.entities.current[characterType + 's'][id].chronicle_id,
-})
+import { getSpecificCharacter } from '../../../selectors/character'
+
+const mapState = (state: State, { id, characterType }: Props): StateProps => {
+  const character = getSpecificCharacter(state, id)
+  return {
+    canEdit: canIEdit(state, id, characterType),
+    chronId: character ? character.chronicle_id : null,
+  }
+}
 
 const mapDispatch = (
   dispatch,

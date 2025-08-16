@@ -72,10 +72,11 @@ function CharacterHeader(props: Props) {
 
 function mapStateToProps(state: State, { location, match }: RouteProps) {
   const id = parseInt(match.params.id, 10)
+  const character = getSpecificCharacter(state, id)
 
   return {
     canIEdit: canIEditCharacter(state, id),
-    character: getSpecificCharacter(state, id),
+    character,
     id,
     path: location.pathname,
   }

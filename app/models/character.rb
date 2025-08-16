@@ -35,6 +35,14 @@ class Character < ApplicationRecord
     has_many :poisons, -> { order(:sorting) }, as: :poisonable, inverse_of: :poisonable
   end
 
+  accepts_nested_attributes_for :merits, allow_destroy: true
+  accepts_nested_attributes_for :weapons, allow_destroy: true
+  accepts_nested_attributes_for :spells, allow_destroy: true
+  accepts_nested_attributes_for :ability_charms, allow_destroy: true
+  accepts_nested_attributes_for :martial_arts_charms, allow_destroy: true
+  accepts_nested_attributes_for :evocations, allow_destroy: true
+  accepts_nested_attributes_for :spirit_charms, allow_destroy: true
+
   normalizes :armor_tags, with: method(:trim_array_attribute)
 
   validates :name, presence: true
